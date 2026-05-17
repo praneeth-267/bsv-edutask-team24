@@ -4,86 +4,102 @@ describe('Assignment 4 GUI Tests', () => {
 
     cy.visit('http://localhost:3000')
 
-    cy.get('#email').type('lucky123@gmail.com')
+    cy.get('#email')
+      .type('spy@gmail.com')
 
-    cy.get('input[type="submit"]').click()
+    cy.get('input[type="submit"]')
+      .click()
 
-  })
-
-  it('TC1 - Create Todo', () => {
-
+    // Create independent task for every test
     cy.get('input[placeholder="Title of your Task"]')
-      .type('Task Cypress')
+      .type('Task Python')
 
     cy.get('input[placeholder*="Viewkey"]')
-      .type('dQw4w9WgXcQ')
+      .type('rfscVS0vtbw')
 
-    cy.contains('Create new Task').click()
-
-    cy.contains('Task Cypress').should('exist')
+    cy.contains('Create new Task')
+      .click()
 
   })
 
-  it('TC2 - Toggle Todo', () => {
+  it('TC1 - Create Todo Task', () => {
 
-    cy.contains('Task Cypress').click()
+    // Verify task creation
+    cy.contains('Task Python')
+      .should('exist')
 
+  })
+
+  it('TC2 - Add Todo Item', () => {
+
+    cy.contains('Task Python')
+      .click()
+
+    // Add todo item
     cy.get('input[placeholder="Add a new todo item"]')
       .type('Finish Assignment 4', { force: true })
 
     cy.contains('Add')
       .click({ force: true })
 
+    // Verify todo item exists
     cy.contains('Finish Assignment 4')
       .should('exist')
 
-    cy.contains('Finish Assignment 4')
+  })
+
+  it('TC3 - Toggle Todo Item', () => {
+
+    cy.contains('Task Python')
+      .click()
+
+    // Create todo item
+    cy.get('input[placeholder="Add a new todo item"]')
+      .type('Toggle Todo', { force: true })
+
+    cy.contains('Add')
+      .click({ force: true })
+
+    // Verify todo item exists
+    cy.contains('Toggle Todo')
+      .should('exist')
+
+    // Toggle todo item
+    cy.contains('Toggle Todo')
       .click({ force: true })
 
   })
 
-  it('TC3 - Delete Todo', () => {
+  it('TC4 - Delete Todo Item', () => {
 
-    cy.contains('Task Cypress').click()
+    cy.contains('Task Python')
+      .click()
 
-    cy.contains('Finish Assignment 4')
+    // Create todo item
+    cy.get('input[placeholder="Add a new todo item"]')
+      .type('Delete Todo', { force: true })
+
+    cy.contains('Add')
+      .click({ force: true })
+
+    // Verify todo item exists
+    cy.contains('Delete Todo')
       .should('exist')
 
+    // Delete todo item
     cy.get('.remover')
       .last()
       .click({ force: true })
 
   })
 
-  it('TC4 - Add Multiple Todo Items', () => {
 
-    cy.contains('Task Cypress').click()
+  it('TC5 - Verify Default Watch Video Todo Exists', () => {
 
-    cy.get('input[placeholder="Add a new todo item"]')
-      .type('Todo One', { force: true })
-
-    cy.contains('Add')
-     .click({ force: true })
-
-    cy.get('input[placeholder="Add a new todo item"]')
-      .type('Todo Two', { force: true })
-
-    cy.contains('Add')
-      .click({ force: true })
-
-    cy.contains('Todo One')
-      .should('exist')
-
-    cy.contains('Todo Two')
-      .should('exist')
-
-  })
-
-  it('TC5 - Verify Video Todo Exists', () => {
-
-    cy.contains('Task Cypress')
+    cy.contains('Task Python')
       .click()
 
+    // Verify default todo item exists
     cy.contains('Watch video')
       .should('exist')
 
