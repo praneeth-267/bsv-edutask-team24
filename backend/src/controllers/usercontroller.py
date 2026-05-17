@@ -1,3 +1,5 @@
+import email
+
 from src.controllers.controller import Controller
 from src.util.dao import DAO
 
@@ -25,7 +27,10 @@ class UserController(Controller):
             Exception -- in case any database operation fails
         """
 
-        if not re.fullmatch(emailValidator, email) or email.startswith('@'):
+        if email.startswith('@'):
+            raise IndexError('Error: missing local part')
+
+        if not re.fullmatch(emailValidator, email):
             raise ValueError('Error: invalid email address')
 
         try:
