@@ -1,108 +1,157 @@
-describe('Assignment 4 GUI Tests', () => {
+describe('Assignment 4 - Requirement 8 GUI Tests', () => {
+
+  let uid
+  let email
+  let taskTitle = `Assignment4 Test Task ${Date.now()}`
+  let todoText = 'Assignment4 Todo'
+
+  before(() => {
+    cy.fixture('user.json').then((user) => {
+      cy.request({
+        method: 'POST',
+        url: 'http://localhost:5000/users/create',
+        form: true,
+        body: user
+      }).then((response) => {
+        uid = response.body._id.$oid
+        email = user.email
+      })
+    })
+  })
 
   beforeEach(() => {
 
-    cy.visit('http://localhost:3000')
+    cy.visit('/')
 
-    cy.get('#email')
-      .type('spy@gmail.com')
+    cy.contains('div', 'Email Address')
+      .find('input[type=text]')
+      .clear()
+      .type(email)
 
-    cy.get('input[type="submit"]')
-      .click()
+    cy.get('form').submit()
 
-    // Create independent task for every test
-    cy.get('input[placeholder="Title of your Task"]')
-      .type('Task Python')
+    cy.get('body').then(($body) => {
 
-    cy.get('input[placeholder*="Viewkey"]')
-      .type('rfscVS0vtbw')
+      if ($body.text().includes(taskTitle)) {
+        cy.contains(taskTitle).click()
+      } else {
 
-    cy.contains('Create new Task')
-      .click()
+        cy.get('input[placeholder="Title of your Task"]')
+          .type(taskTitle)
 
+        cy.get('input[placeholder*="Viewkey"]')
+          .type('9bZkp7q19f0')
+
+        cy.contains('Create new Task').click()
+
+        cy.contains(taskTitle).click()
+      }
+    })
   })
 
-  it('TC1 - Create Todo Task', () => {
-
-    // Verify task creation
-    cy.contains('Task Python')
-      .should('exist')
-
+  after(() => {
+    cy.request({
+      method: 'DELETE',
+      url: `http://localhost:5000/users/${uid}`
+    })
   })
 
-  it('TC2 - Add Todo Item', () => {
+  // ---------------------------------------------------
+  // R8UC1 – Create Todo Item
+  // ---------------------------------------------------
 
-    cy.contains('Task Python')
-      .click()
+  it('TC1 (1.1) - Empty Description Todo Creation', () => {
 
-    // Add todo item
+  cy.get('input[placeholder="Add a new todo item"]')
+    .clear({ force: true });
+
+  cy.contains('input', 'Add')
+    .should('be.disabled');
+
+});
+
+  it('TC2 (1.2) - Non-Empty Description Todo Creation', () => {
+
+        cy.get('input[placeholder="Add a new todo item"]')
+            .clear({ force: true })
+            .type(todoText, { force: true })
+
+        cy.contains('input', 'Add')
+            .click({ force: true })
+
+        cy.contains(todoText)
+            .should('exist')
+    })
+
+    // --------------------------------------------------
+    // TC3 - Toggle Unchecked -> Checked
+    // --------------------------------------------------
+
+    it('TC3 (2.1) - Toggle Todo From Unchecked To Checked', () => {
+
+        cy.get('input[placeholder="Add a new todo item"]')
+            .clear({ force: true })
+            .type('Toggle Check Todo', { force: true })
+
+        cy.contains('input', 'Add')
+            .click({ force: true })
+
+        cy.get('.checker.unchecked')
+            .last()
+            .click({ force: true })
+
+        cy.get('.checker.checked')
+            .should('exist')
+    })
+
+    // --------------------------------------------------
+    // TC4 - Toggle Checked -> Unchecked
+    // --------------------------------------------------
+
+    it('TC4 (2.2) - Toggle Todo From Checked To Unchecked', () => {
+
+        cy.get('input[placeholder="Add a new todo item"]')
+            .clear({ force: true })
+            .type('Toggle Back Todo', { force: true })
+
+        cy.contains('input', 'Add')
+            .click({ force: true })
+
+        cy.get('.checker.unchecked')
+            .last()
+            .click({ force: true })
+
+        cy.get('.checker.checked')
+            .last()
+            .click({ force: true })
+
+        cy.get('.checker.unchecked')
+            .should('exist')
+    })
+
+    // --------------------------------------------------
+    // TC5 - Delete Existing Todo Item
+    // --------------------------------------------------
+
+    it('TC5 (3.1) - Delete Existing Todo Item', () => {
+
     cy.get('input[placeholder="Add a new todo item"]')
-      .type('Finish Assignment 4', { force: true })
+        .clear({ force: true })
+        .type('Delete Test Todo', { force: true })
 
-    cy.contains('Add')
-      .click({ force: true })
+    cy.contains('input', 'Add')
+        .click({ force: true })
 
-    // Verify todo item exists
-    cy.contains('Finish Assignment 4')
-      .should('exist')
+    cy.contains('Delete Test Todo')
+        .should('exist')
 
-  })
-
-  it('TC3 - Toggle Todo Item', () => {
-
-    cy.contains('Task Python')
-      .click()
-
-    // Create todo item
-    cy.get('input[placeholder="Add a new todo item"]')
-      .type('Toggle Todo', { force: true })
-
-    cy.contains('Add')
-      .click({ force: true })
-
-    // Verify todo item exists
-    cy.contains('Toggle Todo')
-      .should('exist')
-
-    // Toggle todo item
-    cy.contains('Toggle Todo')
-      .click({ force: true })
-
-  })
-
-  it('TC4 - Delete Todo Item', () => {
-
-    cy.contains('Task Python')
-      .click()
-
-    // Create todo item
-    cy.get('input[placeholder="Add a new todo item"]')
-      .type('Delete Todo', { force: true })
-
-    cy.contains('Add')
-      .click({ force: true })
-
-    // Verify todo item exists
-    cy.contains('Delete Todo')
-      .should('exist')
-
-    // Delete todo item
     cy.get('.remover')
-      .last()
-      .click({ force: true })
+        .last()
+        .click({ force: true })
 
-  })
+    cy.wait(1000)
 
-
-  it('TC5 - Verify Default Watch Video Todo Exists', () => {
-
-    cy.contains('Task Python')
-      .click()
-
-    // Verify default todo item exists
-    cy.contains('Watch video')
-      .should('exist')
-
-  })
-
+    cy.contains('Delete Test Todo')
+        .should('not.exist')
+})
 })
